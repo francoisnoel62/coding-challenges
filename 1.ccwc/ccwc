@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+import sys
+
+def count_content(content):
+    lines = content.splitlines()
+    words = content.split()
+    characters = len(content)
+    return len(lines), len(words), characters
+
+def print_help():
+    help_message = """
+    Usage: ccwc [OPTION] [FILENAME]
+    Count lines, words, or characters in a text file or standard input.
+
+    Options:
+        -c      count characters
+        -l      count lines
+        -w      count words
+        -m      count characters (multibyte)
+        -h      display this help and exit
+
+    If no OPTION is specified, the default behavior is to count lines, words, and characters.
+    If no FILENAME is specified, input is taken from standard input.
+    """
+    print(help_message)
+
+def main():
+    valid_options = ['-c', '-l', '-w', '-m', '-h']
+    option = None
+    filename = None
+
+    # Check for help option or determine if the arguments are valid
+    if len(sys.argv) == 2:
+        if sys.argv[1] == '-h':
+            print_help()
+            sys.exit(0)
+        elif sys.argv[1] in valid_options:
+            option = sys.argv[1]
+        else:
+            filename = sys.argv[1]
+    elif len(sys.argv) == 3:
+        if sys.argv[1] in valid_options:
+            option = sys.argv[1]
+            filename = sys.argv[2]
+        else:
+            print("Invalid option")
+            sys.exit(1)
+    elif len(sys.argv) > 3 or (len(sys.argv) == 2 and sys.argv[1] not in valid_options):
+        print("Usage: ccwc [-c|-l|-w|-m|-h] [filename]")
+        sys.exit(1)
+
+    # Read content from file or standard input
+    try:
+        if filename:
+            with open(filename, 'r') as file:
+                content = file.read()
+        else:
+            content = sys.stdin.read()
+    except FileNotFoundError:
+        print(f"{filename} not found.")
+        sys.exit(1)
+
+    # Perform counting
+    line_count, word_count, char_count = count_content(content)
+
+    # Output based on the option
+    if option == '-c':
+        print(char_count)
+    elif option == '-l':
+        print(line_count)
+    elif option == '-w':
+        print(word_count)
+    elif option == '-m':
+        print(len(content.encode('utf-8')))
+    elif option is None:
+        print(f"{line_count} lines, {word_count} words, {char_count} characters in '{filename or 'stdin'}'")
+
+if __name__ == "__main__":
+    main()
